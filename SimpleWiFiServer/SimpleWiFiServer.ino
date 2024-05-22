@@ -27,8 +27,8 @@ ported for sparkfun esp32
 
 #include <WiFi.h>
 
-const char* ssid     = "red 12";
-const char* password = "del1al800";
+const char* ssid     = "POCO X5 5G";
+const char* password = "Queves>:/";
 
 int ledPin = 4;
 
