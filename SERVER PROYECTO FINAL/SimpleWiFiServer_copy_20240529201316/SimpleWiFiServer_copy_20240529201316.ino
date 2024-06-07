@@ -1,43 +1,20 @@
-/*
- WiFi Web Server LED Blink
 
- A simple web server that lets you blink an LED via the web.
- This sketch will print the IP address of your WiFi Shield (once connected)
- to the Serial monitor. From there, you can open that address in a web browser
- to turn on and off the LED on pin 5.
-
- If the IP address of your shield is yourAddress:
- http://yourAddress/H turns the LED on
- http://yourAddress/L turns it off
-
- This example is written for a network using WPA2 encryption. For insecure
- WEP or WPA, change the Wifi.begin() call and use Wifi.setMinSecurity() accordingly.
-
- Circuit:
- * WiFi shield attached
- * LED attached to pin 5
-
- created for arduino 25 Nov 2012
- by Tom Igoe
-
-ported for sparkfun esp32 
-31.01.2017 by Jan Hendrik Berlin
- 
- */
-
+#define RxD2 3 
+#define TxD2 1
+#include <HardwareSerial.h>
 #include <WiFi.h>
 
 const char* ssid     = "red 12";
 const char* password = "del1al800";
-
-int ledPin = 4;
+HardwareSerial SerialPort(2); // Instancia del puerto Serial2
 
 WiFiServer server(80);
 
 void setup()
 {
-    Serial.begin(115200);
-    pinMode(ledPin, OUTPUT);      // set the LED pin mode
+    Serial.begin(115200);        // Monitor serie
+    
+    pinMode(5, OUTPUT);      // set the LED pin mode
 
     delay(10);
 
@@ -56,11 +33,13 @@ void setup()
     }
 
     Serial.println("");
+    Serial.println(WiFi.localIP());
     Serial.println("WiFi connected.");
     Serial.println("IP address: ");
-    Serial.println(WiFi.localIP());
+    
     
     server.begin();
+    SerialPort.begin(9600, SERIAL_8N1, RxD2, TxD2); // Configurar Serial2 con RX y TX
 
 }
 
@@ -86,8 +65,8 @@ void loop(){
             client.println();
 
             // the content of the HTTP response follows the header:
-            client.print("Click <a href=\"/H\">here</a> to turn the LED on pin 5 on.<br>");
-            client.print("Click <a href=\"/L\">here</a> to turn the LED on pin 5 off.<br>");
+            client.print("Click <a href=\"/HC\">here</a> to turn the LED on pin 5 on.<br>");
+            client.print("Click <a href=\"/HA\">here</a> to turn the LED on pin 5 off.<br>");
 
             // The HTTP response ends with another blank line:
             client.println();
@@ -101,11 +80,14 @@ void loop(){
         }
 
         // Check to see if the client request was "GET /H" or "GET /L":
-        if (currentLine.endsWith("GET /H")) {
-          digitalWrite(ledPin, HIGH);               // GET /H turns the LED on
+        if (currentLine.endsWith("GET /HC")) {
+          digitalWrite(5, HIGH);
+          SerialPort.println("1");               // GET /H turns the LED on
+          
         }
-        if (currentLine.endsWith("GET /L")) {
-          digitalWrite(ledPin, LOW);                // GET /L turns the LED off
+        if (currentLine.endsWith("GET /HA")) {
+          digitalWrite(5, LOW);  
+          SerialPort.println("0");              // GET /L turns the LED off
         }
       }
     }
@@ -114,3 +96,26 @@ void loop(){
     Serial.println("Client Disconnected.");
   }
 }
+
+
+/*
+
+
+
+void setup() {
+  
+}
+
+void loop() {
+  // Enviar datos al Arduino Mega
+ 
+
+  // Leer datos del Arduino Mega
+  if (SerialPort.available()) {
+    String dataFromArduino = SerialPort.readStringUntil('\n');
+    Serial.print("Datos recibidos del Arduino Mega: ");
+    Serial.println(dataFromArduino);
+  }
+
+  delay(1000); // Esperar 1 segundo
+}*/
